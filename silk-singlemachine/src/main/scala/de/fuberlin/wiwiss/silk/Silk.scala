@@ -49,7 +49,8 @@ object Silk {
    *  - 'configFile' (required): The configuration file
    *  - 'linkSpec' (optional): The link specifications to be executed. If not given, all link specifications are executed.
    *  - 'threads' (optional): The number of threads to be be used for matching.
-   *  - 'reload' (optional): Specifies if the entity cache is to be reloaded before executing the matching. Default: true
+   *  - 'reloadSource' (optional): Specifies if the entity cache of the Source is to be reloaded before executing the matching. Default: true
+   *  - 'reloadTarget' (optional): Specifies if the entity cache of the Target is to be reloaded before executing the matching. Default: true
    */
   def execute() {
     System.getProperty("logQueries") match {
@@ -72,13 +73,19 @@ object Silk {
       case _ => DefaultThreads
     }
 
-    val reload = System.getProperty("reload") match {
+    val reloadSource = System.getProperty("reloadSource") match {
       case BooleanLiteral(b) => b
-      case str: String => throw new IllegalArgumentException("Property 'reload' must be a boolean")
+      case str: String => throw new IllegalArgumentException("Property 'reloadSource' must be a boolean")
       case _ => true
     }
 
-    executeFile(configFile, linkSpec, numThreads, reload)
+    val reloadTarget = System.getProperty("reloadTarget") match {
+      case BooleanLiteral(b) => b
+      case str: String => throw new IllegalArgumentException("Property 'reloadTarget' must be a boolean")
+      case _ => true
+    }
+
+    executeFile(configFile, linkSpec, numThreads, reloadSource, reloadTarget)
   }
 
   /**
@@ -87,11 +94,12 @@ object Silk {
    * @param configFile The configuration file.
    * @param linkSpecID The link specifications to be executed. If not given, all link specifications are executed.
    * @param numThreads The number of threads to be used for matching.
-   * @param reload Specifies if the entity cache is to be reloaded before executing the matching. Default: true
+   * @param reloadSource Specifies if the entity cache of the Source is to be reloaded before executing the matching. Default: true
+   * @param reloadTarget Specifies if the entity cache of the Target is to be reloaded before executing the matching. Default: true
    */
-  def executeFile(configFile: File, linkSpecID: String = null, numThreads: Int = DefaultThreads, reload: Boolean = true) {
+  def executeFile(configFile: File, linkSpecID: String = null, numThreads: Int = DefaultThreads, reloadSource: Boolean = true, reloadTarget: Boolean = true) {
     val resourceLoader = new FileResourceManager(configFile.getParentFile)
-    executeConfig(LinkingConfig.load(resourceLoader)(configFile), linkSpecID, numThreads, reload)
+    executeConfig(LinkingConfig.load(resourceLoader)(configFile), linkSpecID, numThreads, reloadSource, reloadTarget)
   }
 
   /**
@@ -100,17 +108,18 @@ object Silk {
    * @param config The configuration.
    * @param linkSpecID The link specifications to be executed. If not given, all link specifications are executed.
    * @param numThreads The number of threads to be used for matching.
-   * @param reload Specifies if the entity cache is to be reloaded before executing the matching. Default: true
+   * @param reloadSource Specifies if the entity cache of the Source is to be reloaded before executing the matching. Default: true
+   * @param reloadTarget Specifies if the entity cache of the Target is to be reloaded before executing the matching. Default: true
    */
-  def executeConfig(config: LinkingConfig, linkSpecID: String = null, numThreads: Int = DefaultThreads, reload: Boolean = true) {
+  def executeConfig(config: LinkingConfig, linkSpecID: String = null, numThreads: Int = DefaultThreads, reloadSource: Boolean = true, reloadTarget: Boolean = true) {
     if (linkSpecID != null) {
       //Execute a specific link specification
       val linkSpec = config.linkSpec(linkSpecID)
-      executeLinkSpec(config, linkSpec, numThreads, reload)
+      executeLinkSpec(config, linkSpec, numThreads, reloadSource, reloadTarget)
     } else {
       //Execute all link specifications
       for (linkSpec <- config.linkSpecs) {
-        executeLinkSpec(config, linkSpec, numThreads, reload)
+        executeLinkSpec(config, linkSpec, numThreads, reloadSource, reloadTarget)
       }
     }
   }
@@ -121,14 +130,15 @@ object Silk {
    * @param config The configuration.
    * @param linkSpec The link specifications to be executed.
    * @param numThreads The number of threads to be used for matching.
-   * @param reload Specifies if the entity cache is to be reloaded before executing the matching. Default: true
+   * @param reloadSource Specifies if the entity cache of the Source is to be reloaded before executing the matching. Default: true
+   * @param reloadTarget Specifies if the entity cache of the Target is to be reloaded before executing the matching. Default: true
    */
-  private def executeLinkSpec(config: LinkingConfig, linkSpec: LinkSpecification, numThreads: Int = DefaultThreads, reload: Boolean = true) {
+  private def executeLinkSpec(config: LinkingConfig, linkSpec: LinkSpecification, numThreads: Int = DefaultThreads, reloadSource: Boolean = true, reloadTarget: Boolean = true) {
     new GenerateLinksTask(
       sources = config.sources,
       linkSpec = linkSpec,
       outputs = linkSpec.outputs ++ config.outputs,
-      runtimeConfig = config.runtime.copy(numThreads = numThreads, reloadCache = reload)
+      runtimeConfig = config.runtime.copy(numThreads = numThreads, reloadCacheSource = reloadSource, reloadCacheTarget = reloadTarget)
     ).apply()
   }
 

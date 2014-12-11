@@ -76,11 +76,11 @@ class GenerateLinksTask(sources: Traversable[Source],
       val caches = createCaches()
 
       //Create tasks
-      loadTask = new LoadTask(sourcePair, caches)
+      loadTask = new LoadTask(sourcePair, caches, runtimeConfig.reloadCacheSource, runtimeConfig.reloadCacheTarget)
       matchTask = new MatchTask(linkSpec.rule, caches, runtimeConfig)
 
       //Load entities
-      if (runtimeConfig.reloadCache) {
+      if ((runtimeConfig.reloadCacheSource) || (runtimeConfig.reloadCacheTarget)){
         loadTask.statusLogLevel = statusLogLevel
         loadTask.progressLogLevel = progressLogLevel
         loadTask.runInBackground()
@@ -109,8 +109,8 @@ class GenerateLinksTask(sources: Traversable[Source],
       val cacheDir = new File(runtimeConfig.homeDir + "/entityCache/" + linkSpec.id)
 
       DPair(
-        source = new FileEntityCache(entityDescs.source, indexFunction, cacheDir + "/source/", runtimeConfig),
-        target = new FileEntityCache(entityDescs.target, indexFunction, cacheDir + "/target/", runtimeConfig)
+        source = new FileEntityCache(entityDescs.source, indexFunction, cacheDir + "/source/", runtimeConfig, true),
+        target = new FileEntityCache(entityDescs.target, indexFunction, cacheDir + "/target/", runtimeConfig, false)
       )
     } else {
       DPair(

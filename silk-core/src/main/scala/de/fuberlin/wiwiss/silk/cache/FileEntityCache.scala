@@ -26,7 +26,8 @@ import de.fuberlin.wiwiss.silk.entity.{Index, Entity, EntityDescription}
 class FileEntityCache(val entityDesc: EntityDescription,
                       val indexFunction: (Entity => Index),
                       dir: File,
-                      runtimeConfig: RuntimeConfig = RuntimeConfig()) extends EntityCache {
+                      runtimeConfig: RuntimeConfig = RuntimeConfig(),
+                      selectSource: Boolean) extends EntityCache {
 
   private val logger = Logger.getLogger(getClass.getName)
 
@@ -98,7 +99,7 @@ class FileEntityCache(val entityDesc: EntityDescription,
     private val currentIndices = new Array[BitsetIndex](runtimeConfig.partitionSize)
     @volatile private var count = 0
 
-    if (runtimeConfig.reloadCache)
+    if ((runtimeConfig.reloadCacheSource && selectSource) || (runtimeConfig.reloadCacheTarget && !selectSource))
       clear()
     else
       load()

@@ -24,7 +24,9 @@ import de.fuberlin.wiwiss.silk.runtime.task.{TaskFinished, Future, Task}
  * Loads the entity cache
  */
 class LoadTask(sources: DPair[Source],
-               caches: DPair[EntityCache]) extends Task[Unit] {
+               caches: DPair[EntityCache],
+               reloadCacheSource: Boolean = true,
+               reloadCacheTarget: Boolean = true) extends Task[Unit] {
 
   taskName = "Loading"
 
@@ -40,8 +42,12 @@ class LoadTask(sources: DPair[Source],
     sourceLoader = new LoadingThread(true)
     targetLoader = new LoadingThread(false)
 
-    sourceLoader.start()
-    targetLoader.start()
+    if (reloadCacheSource) {
+    	sourceLoader.start()
+  	}
+    if (reloadCacheTarget) {
+    	targetLoader.start()
+    }
 
     while ((sourceLoader.isAlive || targetLoader.isAlive) && !canceled) {
       Thread.sleep(100)

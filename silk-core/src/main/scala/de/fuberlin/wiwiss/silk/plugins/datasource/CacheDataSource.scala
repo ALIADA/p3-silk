@@ -26,7 +26,7 @@ case class CacheDataSource(dir: String) extends DataSource {
   private val file = new File(dir)
 
   def retrieve(entityDesc: EntityDescription, entities: Seq[String] = Seq.empty): Traversable[Entity] = {
-    val entityCache = new FileEntityCache(entityDesc, _ => Index.default, file, RuntimeConfig(reloadCache = false))
+    val entityCache = new FileEntityCache(entityDesc, _ => Index.default, file, RuntimeConfig(reloadCacheSource = false, reloadCacheTarget = false), false)
 
     entityCache.readAll
   }

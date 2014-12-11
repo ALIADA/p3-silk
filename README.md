@@ -1,5 +1,6 @@
 p3-silk
 =======
+A fork of Silk to be released in a Maven repository in Github. This modified version will be used by ALIADA tool.
 
 A fork of Silk to be released to Maven Central.
 

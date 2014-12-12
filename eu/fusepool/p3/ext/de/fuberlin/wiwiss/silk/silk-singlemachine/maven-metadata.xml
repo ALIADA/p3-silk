@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>eu.fusepool.p3.ext.de.fuberlin.wiwiss.silk</groupId>
+  <artifactId>silk-singlemachine</artifactId>
+  <versioning>
+    <versions>
+      <version>2.6.1-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20141212132722</lastUpdated>
+  </versioning>
+</metadata>

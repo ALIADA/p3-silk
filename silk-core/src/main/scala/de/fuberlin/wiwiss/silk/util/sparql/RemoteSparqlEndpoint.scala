@@ -142,14 +142,19 @@ private object RemoteSparqlEndpoint {
    * Opens a new HTTP connection to the endpoint.
    */
   private def openConnection(url: URL, login: Option[(String, String)]): HttpURLConnection = {
+    //Set authentication
+    for ((user, password) <- login) {
+      Authenticator.setDefault(new Authenticator() {
+        override def getPasswordAuthentication = new PasswordAuthentication(user, password.toCharArray)
+      })
+    }
+
     //Open connection
     val httpConnection = url.openConnection.asInstanceOf[HttpURLConnection]
     httpConnection.setRequestProperty("ACCEPT", "application/sparql-results+xml")
-    //Set authentication
-    for ((user, password) <- login) {
-      httpConnection.setRequestProperty("Authorization", "Basic " + DatatypeConverter.printBase64Binary((user + ":" + password).getBytes))
-    }
 
     httpConnection
+  
+  
   }
 }
